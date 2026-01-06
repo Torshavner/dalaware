@@ -1,0 +1,13 @@
+[package]
+name = "nn-core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ndarray = { workspace = true }
+ndarray-rand = { workspace = true }
+rand = { workspace = true }
+thiserror = { workspace = true }
+
+[lints]
+workspace = true

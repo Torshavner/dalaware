@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "==> Running clippy..."
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+echo "==> Clippy complete!"

@@ -1,0 +1,119 @@
+# docker-compose.yml
+services:
+  #########################################
+  # Database (PostgreSQL + TimescaleDB)
+  #########################################
+  postgres-timescale:
+    image: timescale/timescaledb-ha:pg18.1-ts2.23.0-all
+    container_name: postgres-timescale
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=main_db
+    ports:
+      - "5432:5432" # Exposed to your local Rust app
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - monitoring-net
+    labels:
+      - logging="true"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d main_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  #########################################
+  # Database Admin (pgAdmin)
+  #########################################
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@example.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "8081:80"
+    volumes:
+      - pgadmindata:/var/lib/pgadmin
+    networks:
+      - monitoring-net
+    labels:
+      - logging="true"
+    depends_on:
+      postgres-timescale:
+        condition: service_healthy
+
+  #########################################
+  # Log Aggregation (Loki)
+  #########################################
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    command: -config.file=/etc/loki/loki-config.yml
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki-config.yml:/etc/loki/loki-config.yml
+      - loki_data:/loki
+    networks:
+      - monitoring-net
+    labels:
+      - logging="true"
+
+  #########################################
+  # Log Shipper (Vector)
+  #########################################
+  vector:
+    image: timberio/vector:latest-alpine
+    container_name: vector
+    command: --config /etc/vector/vector.toml
+    ports:
+      # --- NEW ---
+      # Expose UDP port 9000 to receive logs from your LOCAL Rust app
+      - "9000:9000/udp"
+      - "8686:8686"
+    volumes:
+      - ./vector.toml:/etc/vector/vector.toml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - monitoring-net
+    labels:
+      - logging="true"
+    depends_on:
+      - loki
+
+  #########################################
+  # Visualization (Grafana)
+  #########################################
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafanadata:/var/lib/grafana
+      - ./grafana-provisioning:/etc/grafana/provisioning
+    networks:
+      - monitoring-net
+    labels:
+      - logging="true"
+    depends_on:
+      - loki
+      - postgres-timescale
+
+# Define persistent volumes
+volumes:
+  pgdata:
+  pgadmindata:
+  grafanadata:
+  loki_data:
+
+# Define shared network
+networks:
+  monitoring-net:
+    driver: bridge
