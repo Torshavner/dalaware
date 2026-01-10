@@ -1,4 +1,4 @@
-use ndarray::Array2;
+use ndarray::{Array2, Axis};
 
 pub trait Activation {
     fn activate(&self, input: &Array2<f32>) -> Array2<f32>;
@@ -28,6 +28,25 @@ impl Activation for ReLU {
 
     fn derivative(&self, input: &Array2<f32>) -> Array2<f32> {
         input.mapv(|x| if x > 0.0 { 1.0 } else { 0.0 })
+    }
+}
+
+pub struct Softmax;
+
+impl Activation for Softmax {
+    fn activate(&self, input: &Array2<f32>) -> Array2<f32> {
+        let row_maxima = input.fold_axis(Axis(1), f32::NEG_INFINITY, |&acc, &x| acc.max(x));
+        let mut exp_input = input - &row_maxima.insert_axis(Axis(1));
+        exp_input.mapv_inplace(|x| x.exp());
+        let row_sums = exp_input.sum_axis(Axis(1));
+
+        exp_input / &row_sums.insert_axis(Axis(1))
+    }
+
+    fn derivative(&self, input: &Array2<f32>) -> Array2<f32> {
+        let softmax_output = self.activate(input);
+
+        &softmax_output * &(1.0 - &softmax_output)
     }
 }
 
@@ -149,6 +168,63 @@ mod tests {
             let result = relu.derivative(&input);
 
             assert_eq!(result[[0, 0]], 0.0);
+        }
+    }
+
+    mod softmax_activation {
+        use super::*;
+
+        #[test]
+        #[allow(non_snake_case)]
+        fn given__uniform_input__when__activate__then__returns_uniform_probabilities() {
+            let softmax = Softmax;
+            let input = array![[1.0, 1.0, 1.0]];
+
+            let result = softmax.activate(&input);
+
+            let expected = 1.0 / 3.0;
+            assert!((result[[0, 0]] - expected).abs() < 1e-6);
+            assert!((result[[0, 1]] - expected).abs() < 1e-6);
+            assert!((result[[0, 2]] - expected).abs() < 1e-6);
+        }
+
+        #[test]
+        #[allow(non_snake_case)]
+        fn given__simple_input__when__activate__then__probabilities_sum_to_one() {
+            let softmax = Softmax;
+            let input = array![[1.0, 2.0, 3.0]];
+
+            let result = softmax.activate(&input);
+
+            let sum: f32 = result.row(0).iter().sum();
+            assert!((sum - 1.0).abs() < 1e-6);
+        }
+
+        #[test]
+        #[allow(non_snake_case)]
+        fn given__large_values__when__activate__then__handles_numerically_stable() {
+            let softmax = Softmax;
+            let input = array![[1000.0, 1001.0, 1002.0]];
+
+            let result = softmax.activate(&input);
+
+            let sum: f32 = result.row(0).iter().sum();
+            assert!((sum - 1.0).abs() < 1e-6);
+            assert!(result.iter().all(|&x| x >= 0.0 && x <= 1.0));
+        }
+
+        #[test]
+        #[allow(non_snake_case)]
+        fn given__batch_input__when__activate__then__each_row_sums_to_one() {
+            let softmax = Softmax;
+            let input = array![[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]];
+
+            let result = softmax.activate(&input);
+
+            for i in 0..2 {
+                let sum: f32 = result.row(i).iter().sum();
+                assert!((sum - 1.0).abs() < 1e-6);
+            }
         }
     }
 }

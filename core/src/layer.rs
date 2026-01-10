@@ -10,8 +10,8 @@ pub enum LayerError {
 }
 
 pub struct DenseLayer {
-    weights: Array2<f32>,
-    biases: Array1<f32>,
+    pub(crate) weights: Array2<f32>,
+    pub(crate) biases: Array1<f32>,
     cached_input: Option<Array2<f32>>,
     weight_gradients: Option<Array2<f32>>,
     bias_gradients: Option<Array1<f32>>,
