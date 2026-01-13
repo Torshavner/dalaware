@@ -1,6 +1,6 @@
 use ndarray::{Array2, Axis};
 
-pub trait Activation {
+pub trait Activation: Send {
     fn activate(&self, input: &Array2<f32>) -> Array2<f32>;
 
     fn derivative(&self, input: &Array2<f32>) -> Array2<f32>;

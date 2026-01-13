@@ -1,6 +1,6 @@
 use ndarray::Array2;
 
-pub trait Module {
+pub trait Module: Send {
     fn forward(&mut self, input: &Array2<f32>) -> Array2<f32>;
 
     fn backward(&mut self, grad_output: &Array2<f32>) -> Array2<f32>;

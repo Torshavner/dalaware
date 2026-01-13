@@ -2,6 +2,7 @@ use anyhow::Result;
 use ndarray::Array2;
 
 /// MNIST dataset structure
+#[derive(Clone)]
 pub struct MnistDataset {
     pub train_images: Array2<f32>,
     pub train_labels: Array2<f32>,
@@ -22,6 +23,7 @@ pub fn load_mnist() -> Result<MnistDataset> {
         ..
     } = mnist::MnistBuilder::new()
         .base_path("data/mnist")
+        .base_url("https://ossci-datasets.s3.amazonaws.com/mnist/")
         .label_format_one_hot()
         .finalize();
 

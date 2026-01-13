@@ -1,0 +1,21 @@
+[package]
+name = "nn-presentation"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+nn-application = { path = "../application" }
+iced = { version = "0.13", features = ["canvas", "tokio"] }
+tokio = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+[[example]]
+name = "mnist_painter"
+path = "examples/mnist_painter.rs"
+
+[[example]]
+name = "mnist_painter_fast"
+path = "examples/mnist_painter_fast.rs"
+
+[lints]
+workspace = true

@@ -5,8 +5,11 @@
       <sourceFolder url="file://$MODULE_DIR$/application/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/application/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/core/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/infrastructure/examples" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/infrastructure/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/viz_dashboard/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/presentation/examples" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/presentation/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
