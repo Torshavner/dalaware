@@ -67,10 +67,29 @@ impl<L: Loss> Trainer<L> {
     ) -> anyhow::Result<Vec<EpochMetrics>> {
         let mut metrics = Vec::with_capacity(self.config.epochs);
 
+        tracing::info!(
+            epochs = self.config.epochs,
+            learning_rate = self.config.learning_rate,
+            batch_size = self.config.batch_size,
+            samples = inputs.nrows(),
+            "Starting training"
+        );
+
         for epoch in 0..self.config.epochs {
             let epoch_metrics = self.train_epoch(model, inputs, targets, epoch)?;
+
+            tracing::info!(
+                epoch = epoch + 1,
+                total_epochs = self.config.epochs,
+                loss = %format!("{:.6}", epoch_metrics.loss),
+                accuracy = %format!("{:.2}%", epoch_metrics.accuracy * 100.0),
+                "Epoch completed"
+            );
+
             metrics.push(epoch_metrics);
         }
+
+        tracing::info!("Training completed successfully");
 
         Ok(metrics)
     }

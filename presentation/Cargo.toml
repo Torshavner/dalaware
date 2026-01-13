@@ -5,8 +5,10 @@ edition = "2021"
 
 [dependencies]
 nn-application = { path = "../application" }
+nn-infrastructure = { path = "../infrastructure" }
 iced = { version = "0.13", features = ["canvas", "tokio"] }
 tokio = { workspace = true }
+tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 
 [[example]]

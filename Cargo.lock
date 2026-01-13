@@ -2094,7 +2094,9 @@ version = "0.1.0"
 dependencies = [
  "iced",
  "nn-application",
+ "nn-infrastructure",
  "tokio",
+ "tracing",
  "tracing-subscriber",
 ]
 

@@ -1,57 +1,61 @@
 use std::env;
 use nn_application::load_mnist;
+use nn_infrastructure::init_tracing;
 use nn_presentation::painter::app::{AppFlags, MnistPainter};
 
 fn main() -> iced::Result {
-    tracing_subscriber::fmt::init();
+    // Initialize structured logging
+    init_tracing().expect("Failed to initialize tracing");
 
     match env::current_dir() {
-        Ok(path) => println!("The current directory is {}", path.display()),
-        Err(e) => eprintln!("Error getting current directory: {}", e),
+        Ok(path) => tracing::info!(current_dir = %path.display(), "Application starting"),
+        Err(e) => tracing::error!(error = ?e, "Failed to get current directory"),
     }
 
-    println!("===============================================");
-    println!("MNIST Digit Painter - Fast Launch");
-    println!("===============================================\n");
+    tracing::info!("===============================================");
+    tracing::info!("MNIST Digit Painter - Fast Launch");
+    tracing::info!("===============================================");
 
-    println!("Checking for MNIST dataset...");
+    tracing::info!("Checking for MNIST dataset...");
 
     // Check if files exist
     let data_path = std::path::Path::new("data/mnist");
     if !data_path.exists() || std::fs::read_dir(data_path).unwrap().count() < 4 {
-        println!("\n⚠️  MNIST dataset not found or incomplete.");
-        println!("\nTo download manually, run these commands:\n");
-        println!("  mkdir -p data/mnist");
-        println!("  cd data/mnist");
-        println!("  curl -O https://ossci-datasets.s3.amazonaws.com/mnist/train-images-idx3-ubyte.gz");
-        println!("  curl -O https://ossci-datasets.s3.amazonaws.com/mnist/train-labels-idx1-ubyte.gz");
-        println!("  curl -O https://ossci-datasets.s3.amazonaws.com/mnist/t10k-images-idx3-ubyte.gz");
-        println!("  curl -O https://ossci-datasets.s3.amazonaws.com/mnist/t10k-labels-idx1-ubyte.gz");
-        println!("  cd ../..\n");
-        println!("Or let the automatic download complete (may take several minutes)...\n");
+        tracing::warn!("MNIST dataset not found or incomplete");
+        tracing::info!("To download manually, run these commands:");
+        tracing::info!("  mkdir -p data/mnist");
+        tracing::info!("  cd data/mnist");
+        tracing::info!("  curl -O https://ossci-datasets.s3.amazonaws.com/mnist/train-images-idx3-ubyte.gz");
+        tracing::info!("  curl -O https://ossci-datasets.s3.amazonaws.com/mnist/train-labels-idx1-ubyte.gz");
+        tracing::info!("  curl -O https://ossci-datasets.s3.amazonaws.com/mnist/t10k-images-idx3-ubyte.gz");
+        tracing::info!("  curl -O https://ossci-datasets.s3.amazonaws.com/mnist/t10k-labels-idx1-ubyte.gz");
+        tracing::info!("  cd ../..");
+        tracing::info!("Or let the automatic download complete (may take several minutes)...");
     }
 
-    println!("Loading MNIST dataset (this may take a while on first run)...");
+    tracing::info!("Loading MNIST dataset (this may take a while on first run)...");
     let dataset = match load_mnist() {
         Ok(ds) => {
-            println!("✓ Dataset loaded successfully!");
-            println!("  Training samples: {}", ds.train_images.nrows());
-            println!("  Test samples: {}\n", ds.test_images.nrows());
+            tracing::info!(
+                train_samples = ds.train_images.nrows(),
+                test_samples = ds.test_images.nrows(),
+                "Dataset loaded successfully"
+            );
             ds
         }
         Err(e) => {
-            eprintln!("\n❌ Failed to load MNIST dataset: {}", e);
-            eprintln!("\nPlease download manually using the commands above.");
+            tracing::error!(error = ?e, "Failed to load MNIST dataset");
+            tracing::error!("Please download manually using the commands above");
             std::process::exit(1);
         }
     };
 
-    println!("Launching MNIST Painter...");
-    println!("\nInstructions:");
-    println!("  1. Configure training parameters (epochs, learning rate, batch size)");
-    println!("  2. Click 'Train Model' to train the neural network");
-    println!("  3. Draw a digit (0-9) on the canvas using your mouse");
-    println!("  4. Click 'Predict' to see what the network thinks you drew\n");
+    tracing::info!("Launching MNIST Painter application");
+    tracing::info!("Instructions:");
+    tracing::info!("  1. Configure training parameters (epochs, learning rate, batch size)");
+    tracing::info!("  2. Click 'Train Model' to train the neural network");
+    tracing::info!("  3. Draw a digit (0-9) on the canvas using your mouse");
+    tracing::info!("  4. Click 'Predict' to see what the network thinks you drew");
 
     MnistPainter::run(AppFlags { dataset })
 }
