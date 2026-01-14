@@ -1,5 +1,5 @@
 use iced::widget::{button, container, text};
-use iced::{Border, Color, Shadow, Theme, Vector};
+use iced::{Border, Color, Shadow, Theme};
 
 // ===== Color Palette =====
 // Professional monochrome design for ML tools
@@ -17,10 +17,7 @@ pub const ACCENT_HOVER: Color = Color::from_rgb(0.40, 0.40, 0.40); // #666666
 pub const ACCENT_ACTIVE: Color = Color::from_rgb(0.30, 0.30, 0.30); // #4d4d4d
 
 // No semantic colors - pure professional gray
-pub const SUCCESS: Color = ACCENT;
-pub const WARNING: Color = ACCENT;
 pub const ERROR: Color = Color::from_rgb(0.50, 0.50, 0.50); // #808080
-pub const INFO: Color = ACCENT;
 
 // Text colors - Grayscale hierarchy
 pub const TEXT_PRIMARY: Color = Color::from_rgb(0.92, 0.92, 0.92); // #ebebeb
@@ -41,10 +38,6 @@ pub const BORDER_WIDTH: f32 = 1.0;
 
 // ===== Container Style Functions =====
 
-pub fn container_transparent() -> impl Fn(&Theme) -> container::Style {
-    |_theme| container::Style::default()
-}
-
 pub fn container_card() -> impl Fn(&Theme) -> container::Style {
     |_theme| container::Style {
         background: Some(BG_CARD.into()),
@@ -58,35 +51,7 @@ pub fn container_card() -> impl Fn(&Theme) -> container::Style {
     }
 }
 
-pub fn container_card_raised() -> impl Fn(&Theme) -> container::Style {
-    |_theme| container::Style {
-        background: Some(BG_RAISED.into()),
-        border: Border {
-            color: BORDER,
-            width: BORDER_WIDTH,
-            radius: BORDER_RADIUS.into(),
-        },
-        shadow: Shadow {
-            color: Color::from_rgba(0.0, 0.0, 0.0, 0.3),
-            offset: Vector::new(0.0, 4.0),
-            blur_radius: 12.0,
-        },
-        text_color: Some(TEXT_PRIMARY),
-    }
-}
 
-pub fn container_status() -> impl Fn(&Theme) -> container::Style {
-    |_theme| container::Style {
-        background: Some(BG_RAISED.into()),
-        border: Border {
-            color: ACCENT,
-            width: 2.0,
-            radius: BORDER_RADIUS.into(),
-        },
-        shadow: Shadow::default(),
-        text_color: Some(TEXT_PRIMARY),
-    }
-}
 
 // ===== Button Style Functions =====
 
@@ -241,32 +206,4 @@ pub fn text_tertiary() -> impl Fn(&Theme) -> text::Style {
     }
 }
 
-pub fn text_accent() -> impl Fn(&Theme) -> text::Style {
-    |_theme| text::Style {
-        color: Some(TEXT_SECONDARY),
-    }
-}
 
-pub fn text_success() -> impl Fn(&Theme) -> text::Style {
-    |_theme| text::Style {
-        color: Some(TEXT_PRIMARY),
-    }
-}
-
-pub fn text_warning() -> impl Fn(&Theme) -> text::Style {
-    |_theme| text::Style {
-        color: Some(TEXT_SECONDARY),
-    }
-}
-
-pub fn text_error() -> impl Fn(&Theme) -> text::Style {
-    |_theme| text::Style {
-        color: Some(ERROR),
-    }
-}
-
-pub fn text_disabled() -> impl Fn(&Theme) -> text::Style {
-    |_theme| text::Style {
-        color: Some(TEXT_DISABLED),
-    }
-}

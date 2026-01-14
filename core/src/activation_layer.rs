@@ -2,16 +2,6 @@ use crate::activation::Activation;
 use crate::module::Module;
 use ndarray::Array2;
 
-/// Wrapper that adapts an `Activation` function into a `Module`
-///
-/// This allows activations (ReLU, Sigmoid, Softmax) to be used in Sequential containers
-/// alongside DenseLayer.
-///
-/// Example usage:
-/// ```ignore
-/// let relu_layer = ActivationLayer::new(ReLU);
-/// let sigmoid_layer = ActivationLayer::new(Sigmoid);
-/// ```
 pub struct ActivationLayer<A: Activation> {
     activation: A,
     cached_input: Option<Array2<f32>>,

@@ -14,6 +14,18 @@ pub struct MnistDataset {
 ///
 /// Downloads if needed, normalizes images, and one-hot encodes labels
 pub fn load_mnist() -> Result<MnistDataset> {
+    // Try to find data/mnist directory - check both from workspace root and from crate root
+    let base_path = if std::path::Path::new("data/mnist").exists() {
+        "data/mnist"
+    } else if std::path::Path::new("../data/mnist").exists() {
+        "../data/mnist"
+    } else if std::path::Path::new("../../data/mnist").exists() {
+        "../../data/mnist"
+    } else {
+        // Default - will download if needed
+        "data/mnist"
+    };
+
     // Load MNIST data using the mnist crate
     let mnist::Mnist {
         trn_img,
@@ -22,7 +34,7 @@ pub fn load_mnist() -> Result<MnistDataset> {
         tst_lbl,
         ..
     } = mnist::MnistBuilder::new()
-        .base_path("data/mnist")
+        .base_path(base_path)
         .base_url("https://ossci-datasets.s3.amazonaws.com/mnist/")
         .label_format_one_hot()
         .finalize();

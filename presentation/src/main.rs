@@ -21,11 +21,9 @@ const MAX_NEURONS_PER_LAYER: u8 = 128;
 const DEFAULT_NEURON_COUNT: usize = 64;
 
 // Spacing constants
-const SPACE_XS: f32 = 5.0; // Tight spacing (list items, icon-text)
 const SPACE_SM: f32 = 8.0; // Standard spacing (form controls, column items)
 const SPACE_MD: f32 = 10.0; // Medium spacing (button groups)
 const SPACE_LG: f32 = 20.0; // Large spacing (major sections)
-const SPACE_XL: f32 = 40.0; // Extra-large spacing (panel separation)
 
 const PADDING_CONTROL: f32 = 12.0; // Inside cards
 const PADDING_PANEL: f32 = 20.0; // Main panels
@@ -195,13 +193,6 @@ fn parameter_row<'a>(
     ]
     .spacing(SPACE_MD)
     .align_y(Alignment::Center)
-}
-
-/// Create a button group with consistent spacing
-fn button_group<'a>(buttons: Vec<Element<'a, Message>>) -> Row<'a, Message> {
-    Row::with_children(buttons)
-        .spacing(SPACE_SM)
-        .align_y(Alignment::Center)
 }
 
 impl PlaygroundApp {

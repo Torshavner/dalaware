@@ -33,9 +33,13 @@ fn given__mnist_subset_100_samples__when__train_10_epochs__then__loss_decreases_
     let trainer = Trainer::new(config, CrossEntropy);
 
     println!("Training...");
-    let metrics = trainer
-        .train(&mut model, &dataset.train_images, &dataset.train_labels)
-        .expect("Training failed");
+    let metrics = trainer.train(
+        &mut model,
+        &dataset.train_images,
+        &dataset.train_labels,
+        &dataset.test_images,
+        &dataset.test_labels,
+    ).expect("Training failed");
 
     let initial_loss = metrics.first().unwrap().loss;
     let final_loss = metrics.last().unwrap().loss;
@@ -96,7 +100,13 @@ fn given__full_mnist_dataset__when__train_15_epochs__then__achieves_90_percent_a
 
     println!("\nTraining for {} epochs...", epochs);
     let metrics = trainer
-        .train(&mut model, &dataset.train_images, &dataset.train_labels)
+        .train(
+            &mut model,
+            &dataset.train_images,
+            &dataset.train_labels,
+            &dataset.test_images,
+            &dataset.test_labels,
+        )
         .expect("Training failed");
 
     println!("\nEpoch | Train Loss | Train Acc");

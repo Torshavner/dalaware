@@ -1,22 +1,6 @@
 use crate::module::Module;
 use ndarray::Array2;
 
-/// Sequential container for composing multiple layers into a neural network
-///
-/// Executes layers in order during forward pass, reverse order during backward pass.
-///
-/// Example usage:
-/// ```ignore
-/// use nn_core::sequential::Sequential;
-/// use nn_core::layer::DenseLayer;
-/// use nn_core::activation_layer::ActivationLayer;
-/// use nn_core::activation::ReLU;
-///
-/// let mut model = Sequential::new();
-/// model.add(Box::new(DenseLayer::new(784, 128)));
-/// model.add(Box::new(ActivationLayer::new(ReLU)));
-/// model.add(Box::new(DenseLayer::new(128, 10)));
-/// ```
 pub struct Sequential {
     layers: Vec<Box<dyn Module>>,
 }

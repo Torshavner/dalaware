@@ -14,17 +14,6 @@ tracing-subscriber = { workspace = true }
 ndarray = { workspace = true }
 rand = { workspace = true }
 
-[[example]]
-name = "mnist_painter"
-path = "examples/mnist_painter.rs"
-
-[[example]]
-name = "mnist_painter_fast"
-path = "examples/mnist_painter_fast.rs"
-
-[[example]]
-name = "playground_mnist"
-path = "examples/playground_mnist.rs"
 
 [lints]
 workspace = true

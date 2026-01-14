@@ -14,7 +14,6 @@ impl NetworkBuilder {
         let mut model = Sequential::new();
         let mut prev_size = config.input_size;
 
-        // Add hidden layers
         for layer_config in &config.hidden_layers {
             model.add(Box::new(DenseLayer::new(prev_size, layer_config.neurons)));
 
@@ -33,7 +32,6 @@ impl NetworkBuilder {
             prev_size = layer_config.neurons;
         }
 
-        // Add output layer
         model.add(Box::new(DenseLayer::new(prev_size, config.output_size)));
         model.add(Box::new(ActivationLayer::new(Softmax)));
 

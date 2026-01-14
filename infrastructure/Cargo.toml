@@ -15,9 +15,5 @@ tracing-subscriber = { workspace = true }
 tokio = { workspace = true }
 iced = { version = "0.13", features = ["canvas", "tokio"] }
 
-[[example]]
-name = "mnist_painter"
-path = "examples/mnist_painter.rs"
-
 [lints]
 workspace = true
