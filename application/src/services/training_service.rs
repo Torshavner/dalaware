@@ -52,6 +52,8 @@ impl MnistTrainingService {
             &mut model,
             &self.dataset.train_images,
             &self.dataset.train_labels,
+            &self.dataset.test_images,   // Validate on test set
+            &self.dataset.test_labels,   // Validate on test set
         )?;
 
         let progress: Vec<TrainingProgress> = metrics

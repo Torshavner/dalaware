@@ -131,6 +131,8 @@ impl MnistPainter {
                         &mut model,
                         &self.dataset.train_images,
                         &self.dataset.train_labels,
+                        &self.dataset.test_images,
+                        &self.dataset.test_labels,
                     )
                     .unwrap();
 
@@ -371,7 +373,13 @@ async fn train_model_async(
         };
         let trainer = Trainer::new(config, CrossEntropy);
         let metrics = trainer
-            .train(&mut model, &dataset.train_images, &dataset.train_labels)
+            .train(
+                &mut model,
+                &dataset.train_images,
+                &dataset.train_labels,
+                &dataset.test_images,
+                &dataset.test_labels,
+            )
             .expect("Training failed");
 
         let final_metrics = metrics.last().expect("No training metrics");

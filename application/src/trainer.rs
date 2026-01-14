@@ -56,14 +56,25 @@ impl<L: Loss> Trainer<L> {
         Self { config, loss_fn }
     }
 
-    /// Train the model on the full dataset
+    /// Train the model on the training dataset
     ///
-    /// Returns a vector of EpochMetrics, one per epoch
+    /// Evaluates on the validation set after each epoch to track generalization
+    ///
+    /// # Arguments
+    /// * `model` - The neural network model to train
+    /// * `train_inputs` - Training data inputs
+    /// * `train_targets` - Training data targets
+    /// * `val_inputs` - Validation data inputs (typically test set)
+    /// * `val_targets` - Validation data targets (typically test set)
+    ///
+    /// Returns a vector of EpochMetrics with validation loss/accuracy, one per epoch
     pub fn train<M: Module>(
         &self,
         model: &mut M,
-        inputs: &Array2<f32>,
-        targets: &Array2<f32>,
+        train_inputs: &Array2<f32>,
+        train_targets: &Array2<f32>,
+        val_inputs: &Array2<f32>,
+        val_targets: &Array2<f32>,
     ) -> anyhow::Result<Vec<EpochMetrics>> {
         let mut metrics = Vec::with_capacity(self.config.epochs);
 
@@ -71,16 +82,31 @@ impl<L: Loss> Trainer<L> {
             epochs = self.config.epochs,
             learning_rate = self.config.learning_rate,
             batch_size = self.config.batch_size,
-            samples = inputs.nrows(),
+            train_samples = train_inputs.nrows(),
+            val_samples = val_inputs.nrows(),
             "Starting training"
         );
 
         for epoch in 0..self.config.epochs {
-            let epoch_metrics = self.train_epoch(model, inputs, targets, epoch)?;
+            let start = std::time::Instant::now();
+
+            // Train on training set
+            self.train_epoch(model, train_inputs, train_targets)?;
+
+            // Evaluate on validation set
+            let (loss, accuracy) = self.evaluate(model, val_inputs, val_targets)?;
+
+            let duration = start.elapsed();
+            let epoch_metrics = EpochMetrics {
+                epoch,
+                loss,
+                accuracy,
+            };
 
             tracing::info!(
                 epoch = epoch + 1,
                 total_epochs = self.config.epochs,
+                duration_secs = duration.as_secs(),
                 loss = %format!("{:.6}", epoch_metrics.loss),
                 accuracy = %format!("{:.2}%", epoch_metrics.accuracy * 100.0),
                 "Epoch completed"
@@ -96,14 +122,13 @@ impl<L: Loss> Trainer<L> {
 
     /// Train for a single epoch (one pass through the dataset)
     ///
-    /// Returns the epoch metrics
-    pub fn train_epoch<M: Module>(
+    /// Performs forward pass, backward pass, and parameter updates for all batches
+    fn train_epoch<M: Module>(
         &self,
         model: &mut M,
         inputs: &Array2<f32>,
         targets: &Array2<f32>,
-        epoch: usize,
-    ) -> anyhow::Result<EpochMetrics> {
+    ) -> anyhow::Result<()> {
         let num_samples = inputs.nrows();
         let batch_size = self.config.batch_size.min(num_samples);
 
@@ -118,9 +143,6 @@ impl<L: Loss> Trainer<L> {
             // Forward pass
             let predictions = model.forward(&batch_inputs);
 
-            // Calculate loss (for monitoring, not used in training directly)
-            let _batch_loss = self.loss_fn.calculate(&predictions, &batch_targets);
-
             // Backward pass
             let grad = self.loss_fn.gradient(&predictions, &batch_targets);
             model.backward(&grad);
@@ -129,14 +151,7 @@ impl<L: Loss> Trainer<L> {
             model.update_parameters(self.config.learning_rate);
         }
 
-        // Evaluate on full dataset for metrics
-        let (loss, accuracy) = self.evaluate(model, inputs, targets)?;
-
-        Ok(EpochMetrics {
-            epoch,
-            loss,
-            accuracy,
-        })
+        Ok(())
     }
 
     /// Evaluate the model (forward pass only, no training)
@@ -280,10 +295,20 @@ mod tests {
             model.add(Box::new(DenseLayer::new(2, 1)));
 
             // Simple linear problem: y = x1 + x2
-            let inputs = array![[1.0, 1.0], [2.0, 2.0], [3.0, 3.0], [4.0, 4.0]];
-            let targets = array![[2.0], [4.0], [6.0], [8.0]];
+            let train_inputs = array![[1.0, 1.0], [2.0, 2.0], [3.0, 3.0], [4.0, 4.0]];
+            let train_targets = array![[2.0], [4.0], [6.0], [8.0]];
 
-            let result = trainer.train(&mut model, &inputs, &targets);
+            // Use same data for validation in this test
+            let val_inputs = train_inputs.clone();
+            let val_targets = train_targets.clone();
+
+            let result = trainer.train(
+                &mut model,
+                &train_inputs,
+                &train_targets,
+                &val_inputs,
+                &val_targets,
+            );
 
             assert!(result.is_ok());
             let metrics = result.unwrap();

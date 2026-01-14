@@ -121,8 +121,19 @@ dalaware/
 │   └── tests/
 │       ├── xor_test.rs        # XOR integration test
 │       └── mnist_test.rs      # MNIST integration tests
+├── presentation/              # UI layer (ICED)
+│   ├── examples/
+│   │   └── mnist_painter_fast.rs  # Interactive MNIST digit painter
+│   └── src/
+│       └── painter/           # Canvas widgets
+├── infrastructure/            # External integrations
+│   └── observability/         # Structured logging (tracing)
 └── docs/                      # Documentation
     ├── user-stories/          # Implementation guides
+    │   └── neural_network_playground.md  # Playground feature spec
+    ├── PLAYGROUND_ARCHITECTURE.md         # Playground design
+    ├── PERFORMANCE_OPTIMIZATION.md        # Training optimization guide
+    ├── CLEAN_ARCHITECTURE.md              # Architecture principles
     ├── IMPLEMENTATION_SUMMARY.md
     └── FINAL_STATUS.md
 ```
@@ -181,10 +192,19 @@ fn gradient(&self, predictions: &Array2<f32>, targets: &Array2<f32>) -> Array2<f
 
 ## 📚 Documentation
 
+### Core Framework
 - **[Implementation Summary](docs/IMPLEMENTATION_SUMMARY.md)** - Detailed breakdown
 - **[Final Status](FINAL_STATUS.md)** - Complete overview with examples
 - **[Softmax Guide](docs/user-stories/softmax-implementation.md)** - How to implement numerically stable Softmax
 - **[Cross-Entropy Guide](docs/user-stories/cross-entropy-implementation.md)** - Why it pairs with Softmax
+
+### Architecture & Design
+- **[Clean Architecture](docs/CLEAN_ARCHITECTURE.md)** - Layered design principles
+- **[Performance Optimization](docs/PERFORMANCE_OPTIMIZATION.md)** - Training speed improvements
+
+### Planned Features
+- **[Neural Network Playground](docs/PLAYGROUND_ARCHITECTURE.md)** - Interactive visualization design
+- **[Playground User Story](docs/user-stories/neural_network_playground.md)** - Feature specifications
 
 ## 🧪 Testing
 
@@ -209,6 +229,17 @@ cargo test -- --nocapture
 - [x] Clean architecture (modular, testable)
 - [x] Comprehensive tests (100% core coverage)
 - [x] No high-level ML libraries
+
+## 🎨 Interactive Visualization (Planned)
+
+**Neural Network Playground** - An interactive GUI for understanding neural networks visually:
+- Real-time decision boundary visualization
+- Multiple datasets (Circle, XOR, Gaussian, Spiral)
+- Interactive network configuration
+- Feature engineering controls
+- Live training metrics
+
+See [Playground Architecture](docs/PLAYGROUND_ARCHITECTURE.md) and [User Story](docs/user-stories/neural_network_playground.md) for details.
 
 ## 🚀 Future Enhancements
 
