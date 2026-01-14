@@ -1,6 +1,6 @@
 use iced::widget::canvas::Cache;
 use iced::widget::{button, canvas::Canvas, column, container, progress_bar, row, text, text_input};
-use iced::{Alignment, Element, Fill, Length, Task, Theme};
+use iced::{Alignment, Element, Fill, Length, Task};
 use ndarray::Array2;
 use nn_application::{MnistDataset, Trainer, TrainerConfig};
 use nn_core::activation::{ReLU, Softmax};
@@ -59,6 +59,7 @@ impl MnistPainter {
         )
     }
 
+    #[allow(dead_code)]
     fn title(&self) -> String {
         String::from("MNIST Digit Painter - Neural Network from Scratch")
     }
@@ -159,7 +160,7 @@ impl MnistPainter {
         Task::none()
     }
 
-    fn view(&self) -> Element<Message> {
+    fn view(&self) -> Element<'_, Message> {
         let canvas_widget = Canvas::new(PixelCanvas {
             pixels: &self.canvas,
             cache: &self.canvas_cache,

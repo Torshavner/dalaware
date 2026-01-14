@@ -50,6 +50,7 @@ impl MnistPainter {
         )
     }
 
+    #[allow(dead_code)]
     fn title(&self) -> String {
         String::from("MNIST Digit Painter - Neural Network from Scratch")
     }
@@ -119,7 +120,7 @@ impl MnistPainter {
         Task::none()
     }
 
-    fn view(&self) -> Element<Message> {
+    fn view(&self) -> Element<'_, Message> {
         let canvas_widget = Canvas::new(PixelCanvas {
             pixels: &self.canvas,
             cache: &self.canvas_cache,
@@ -283,7 +284,7 @@ impl MnistPainter {
 }
 
 async fn train_model_async(
-    mut service: MnistTrainingService,
+    service: MnistTrainingService,
     config: TrainerConfig,
 ) -> TrainingResult {
     tokio::task::spawn_blocking(move || {

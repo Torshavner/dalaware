@@ -2059,6 +2059,7 @@ dependencies = [
  "mnist",
  "ndarray",
  "nn-core",
+ "serde",
  "tracing",
 ]
 
@@ -2093,8 +2094,11 @@ name = "nn-presentation"
 version = "0.1.0"
 dependencies = [
  "iced",
+ "ndarray",
  "nn-application",
+ "nn-core",
  "nn-infrastructure",
+ "rand",
  "tokio",
  "tracing",
  "tracing-subscriber",

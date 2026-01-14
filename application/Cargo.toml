@@ -9,6 +9,7 @@ anyhow = { workspace = true }
 tracing = { workspace = true }
 ndarray = { workspace = true }
 mnist = { version = "0.5", features = ["download"] }
+serde = { workspace = true }
 
 [lints]
 workspace = true

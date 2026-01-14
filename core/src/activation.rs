@@ -31,6 +31,31 @@ impl Activation for ReLU {
     }
 }
 
+pub struct Tanh;
+
+impl Activation for Tanh {
+    fn activate(&self, input: &Array2<f32>) -> Array2<f32> {
+        input.mapv(|x| x.tanh())
+    }
+
+    fn derivative(&self, input: &Array2<f32>) -> Array2<f32> {
+        let activated = self.activate(input);
+        1.0 - &activated * &activated
+    }
+}
+
+pub struct Linear;
+
+impl Activation for Linear {
+    fn activate(&self, input: &Array2<f32>) -> Array2<f32> {
+        input.clone()
+    }
+
+    fn derivative(&self, _input: &Array2<f32>) -> Array2<f32> {
+        Array2::ones(_input.dim())
+    }
+}
+
 pub struct Softmax;
 
 impl Activation for Softmax {
