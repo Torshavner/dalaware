@@ -27,8 +27,9 @@ fn given__mnist_subset_100_samples__when__train_10_epochs__then__loss_decreases_
 
     let config = TrainerConfig {
         epochs: 10,
-        learning_rate: 0.1,
+        learning_rate: 0.01,
         batch_size: 32,
+        lr_decay: 1.0,
     };
     let trainer = Trainer::new(config, CrossEntropy);
 
@@ -95,6 +96,7 @@ fn given__full_mnist_dataset__when__train_15_epochs__then__achieves_90_percent_a
         epochs,
         learning_rate: 0.01,
         batch_size: 64,
+        lr_decay: 0.95,
     };
     let trainer = Trainer::new(config, CrossEntropy);
 

@@ -1,6 +1,8 @@
 use nn_core::loss::Loss;
 use nn_core::Module;
 use ndarray::Array2;
+use rand::seq::SliceRandom;
+use rand::thread_rng;
 
 /// Training metrics for a single epoch
 #[derive(Debug, Clone)]
@@ -15,6 +17,9 @@ pub struct TrainerConfig {
     pub epochs: usize,
     pub learning_rate: f32,
     pub batch_size: usize,
+    /// Multiplicative decay applied to learning rate after each epoch (e.g. 0.95).
+    /// Set to 1.0 to disable decay.
+    pub lr_decay: f32,
 }
 
 impl Default for TrainerConfig {
@@ -23,6 +28,7 @@ impl Default for TrainerConfig {
             epochs: 10,
             learning_rate: 0.01,
             batch_size: 32,
+            lr_decay: 1.0,
         }
     }
 }
@@ -87,11 +93,16 @@ impl<L: Loss> Trainer<L> {
             "Starting training"
         );
 
+        let mut learning_rate = self.config.learning_rate;
+
         for epoch in 0..self.config.epochs {
             let start = std::time::Instant::now();
 
             // Train on training set
-            self.train_epoch(model, train_inputs, train_targets)?;
+            self.train_epoch(model, train_inputs, train_targets, learning_rate)?;
+
+            // Decay learning rate for the next epoch
+            learning_rate *= self.config.lr_decay;
 
             // Evaluate on validation set
             let (loss, accuracy) = self.evaluate(model, val_inputs, val_targets)?;
@@ -122,23 +133,33 @@ impl<L: Loss> Trainer<L> {
 
     /// Train for a single epoch (one pass through the dataset)
     ///
-    /// Performs forward pass, backward pass, and parameter updates for all batches
+    /// Performs forward pass, backward pass, and parameter updates for all batches.
+    /// Data is shuffled each epoch to prevent ordering bias.
     fn train_epoch<M: Module>(
         &self,
         model: &mut M,
         inputs: &Array2<f32>,
         targets: &Array2<f32>,
+        learning_rate: f32,
     ) -> anyhow::Result<()> {
         let num_samples = inputs.nrows();
         let batch_size = self.config.batch_size.min(num_samples);
 
-        // Process all samples in batches
-        for start_idx in (0..num_samples).step_by(batch_size) {
-            let end_idx = (start_idx + batch_size).min(num_samples);
+        // Shuffle indices each epoch
+        let mut indices: Vec<usize> = (0..num_samples).collect();
+        indices.shuffle(&mut thread_rng());
 
-            // Extract batch
-            let batch_inputs = inputs.slice(ndarray::s![start_idx..end_idx, ..]).to_owned();
-            let batch_targets = targets.slice(ndarray::s![start_idx..end_idx, ..]).to_owned();
+        // Process all samples in batches
+        for batch_indices in indices.chunks(batch_size) {
+            // Extract shuffled batch
+            let batch_inputs = ndarray::stack(
+                ndarray::Axis(0),
+                &batch_indices.iter().map(|&i| inputs.row(i)).collect::<Vec<_>>(),
+            )?;
+            let batch_targets = ndarray::stack(
+                ndarray::Axis(0),
+                &batch_indices.iter().map(|&i| targets.row(i)).collect::<Vec<_>>(),
+            )?;
 
             // Forward pass
             let predictions = model.forward(&batch_inputs);
@@ -148,7 +169,7 @@ impl<L: Loss> Trainer<L> {
             model.backward(&grad);
 
             // Update parameters
-            model.update_parameters(self.config.learning_rate);
+            model.update_parameters(learning_rate);
         }
 
         Ok(())
@@ -237,6 +258,7 @@ mod tests {
                 epochs: 5,
                 learning_rate: 0.05,
                 batch_size: 16,
+                lr_decay: 1.0,
             };
             let _trainer = Trainer::new(config, MeanSquaredError);
 
@@ -286,8 +308,9 @@ mod tests {
         fn given__simple_model__when__train__then__loss_decreases() {
             let config = TrainerConfig {
                 epochs: 100,
-                learning_rate: 0.1,
-                batch_size: 2,
+                learning_rate: 0.01,
+                batch_size: 4,
+                lr_decay: 1.0,
             };
             let trainer = Trainer::new(config, MeanSquaredError);
 

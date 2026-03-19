@@ -8,6 +8,7 @@ nn-core = { path = "../core" }
 anyhow = { workspace = true }
 tracing = { workspace = true }
 ndarray = { workspace = true }
+rand = { workspace = true }
 mnist = { version = "0.5", features = ["download"] }
 serde = { workspace = true }
 

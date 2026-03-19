@@ -68,10 +68,11 @@ impl Activation for Softmax {
         exp_input / &row_sums.insert_axis(Axis(1))
     }
 
+    // The Softmax+CrossEntropy combined gradient (predictions - targets) is computed
+    // directly in CrossEntropy::gradient and passed through here unchanged.
+    // Returning ones preserves that gradient correctly.
     fn derivative(&self, input: &Array2<f32>) -> Array2<f32> {
-        let softmax_output = self.activate(input);
-
-        &softmax_output * &(1.0 - &softmax_output)
+        Array2::ones(input.dim())
     }
 }
 

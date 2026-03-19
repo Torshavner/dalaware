@@ -89,6 +89,7 @@ impl MnistPainter {
                         epochs,
                         learning_rate,
                         batch_size,
+                        lr_decay: 0.95,
                     };
 
                     return Task::perform(
